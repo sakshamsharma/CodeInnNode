@@ -26,14 +26,14 @@ connection.connect();
 
 app.get('/', function (req, res) {
 
-  res.send('Hello hacker!');
+  res.send('Hello hacker! Its ' + new Date().getTime());
 
 });
 
 // API Routes
 app.get('/api/query', api.query(connection))
 
-app.get('/api/compile', api.compile)
+app.post('/api/compile', api.compile)
 
 // USERS Routes
 app.post('/users/login', users.login(connection))
