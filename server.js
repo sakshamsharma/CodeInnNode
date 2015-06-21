@@ -35,6 +35,8 @@ app.get('/api/query', api.query(connection))
 
 app.post('/api/compile', api.compile)
 
+app.post('/api/run', api.run)
+
 // USERS Routes
 app.post('/users/login', users.login(connection))
 
