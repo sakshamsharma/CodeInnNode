@@ -12,6 +12,9 @@ var mysqlPass = process.env.OPENSHIFT_MYSQL_DB_PASSWORD || '0808';
 var users = require('./users.js')
 var api   = require('./api.js')
 
+var sys = require('sys')
+var exec = require('child_process').exec;
+
 var connection = mysql.createConnection({
   host     : mysqlHost,
   user     : mysqlUser,
@@ -29,6 +32,8 @@ app.get('/', function (req, res) {
 
 // API Routes
 app.get('/api/query', api.query(connection))
+
+app.get('/api/compile', api.compile)
 
 // USERS Routes
 app.post('/users/login', users.login(connection))

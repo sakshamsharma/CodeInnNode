@@ -1,3 +1,7 @@
+var sys = require('sys')
+var exec = require('child_process').exec;
+var spawn = require('child_process').spawn;
+
 exports.query = function(connection) {
 
   return function(req, res) {
@@ -10,5 +14,16 @@ exports.query = function(connection) {
     })
 
   }
+
+}
+
+exports.compile = function(req, res) {
+
+  exec("g++ cpp/test.cpp", function (error, stdout, stderr) {
+    var child = spawn('./a.out');
+    child.stdin.setEncoding = 'utf-8';
+    child.stdout.pipe(res);
+    child.stdin.write("Saksham\n");
+  });
 
 }
