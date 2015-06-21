@@ -4,6 +4,9 @@ var mysql = require('mysql');
 
 var app = express();
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+  extended: true
+})); 
 
 var mysqlHost = process.env.OPENSHIFT_MYSQL_DB_HOST || 'localhost';
 var mysqlUser = process.env.OPENSHIFT_MYSQL_DB_USERNAME || 'root';
