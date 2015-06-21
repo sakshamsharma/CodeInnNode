@@ -33,9 +33,9 @@ app.get('/', function (req, res) {
 // API Routes
 app.get('/api/query', api.query(connection))
 
-app.post('/api/compile', api.compile)
+app.get('/api/compile', api.compile)
 
-app.post('/api/run', api.run)
+app.get('/api/run', api.run)
 
 // USERS Routes
 app.post('/users/login', users.login(connection))

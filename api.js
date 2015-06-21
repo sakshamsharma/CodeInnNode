@@ -21,9 +21,8 @@ exports.query = function(connection) {
 exports.compile = function(req, res) {
 
   var curtime = new Date().getTime();
-  //I2luY2x1ZGUgPGlvc3RyZWFtPg0KDQp1c2luZyBuYW1lc3BhY2Ugc3RkOw0KDQppbnQgbWFpbigpIHsNCglzdHJpbmcgbmFtZTsNCgljaW4gPj4gbmFtZTsNCgljb3V0IDw8ICJIZWxsbyAiIDw8IG5hbWUgPDwgZW5kbDsNCglyZXR1cm4gMDsNCn0NCg==
-
-  fs.writeFile("./cpp/" + curtime + ".cpp", new Buffer(req.body.Content, 'base64'), function(err) {
+  
+  fs.writeFile("./cpp/" + curtime + ".cpp", new Buffer(req.query.Content, 'base64'), function(err) {
     if (err) return console.log(err);
     console.log("File written");
 
@@ -57,7 +56,7 @@ exports.run = function(req, res) {
   var curtime = new Date().getTime();
   //I2luY2x1ZGUgPGlvc3RyZWFtPg0KDQp1c2luZyBuYW1lc3BhY2Ugc3RkOw0KDQppbnQgbWFpbigpIHsNCglzdHJpbmcgbmFtZTsNCgljaW4gPj4gbmFtZTsNCgljb3V0IDw8ICJIZWxsbyAiIDw8IG5hbWUgPDwgZW5kbDsNCglyZXR1cm4gMDsNCn0NCg==
 
-  fs.writeFile("./cpp/" + curtime + ".cpp", new Buffer(req.body.Content, 'base64'), function(err) {
+  fs.writeFile("./cpp/" + curtime + ".cpp", new Buffer(req.query.Content, 'base64'), function(err) {
     if (err) return console.log(err);
     console.log("File written");
 
@@ -72,7 +71,7 @@ exports.run = function(req, res) {
       var child = spawn('./a.out');
       child.stdin.setEncoding = 'utf-8';
       child.stdout.pipe(res);
-      child.stdin.write(req.body.Input + "\n");
+      child.stdin.write(req.query.Input + "\n");
 
       fs.unlink("./cpp/" + curtime + ".cpp", function(err) {
         if(err) throw err;
