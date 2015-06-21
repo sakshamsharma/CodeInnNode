@@ -1,17 +1,16 @@
 {
-  "name": "CodeInn backend",
+  "name": "OpenShift-Nodejs-Cartridge",
   "version": "1.1.0",
-  "description": "CodeInn backend based on Node, deployed with OpenShift",
+  "description": "Node.js Cartridge for OpenShift",
   "keywords": [
     "OpenShift",
     "Node.js",
-    "CodeInn",
-    "codeinn",
+    "application",
     "openshift"
   ],
   "author": {
-    "name": "Saksham Sharma",
-    "email": "saksham0808@gmail.com",
+    "name": "OpenShift",
+    "email": "ryanj@redhat.com",
     "url":  "http://openshift.redhat.com/"
   },
   "homepage": "http://openshift.redhat.com/",
