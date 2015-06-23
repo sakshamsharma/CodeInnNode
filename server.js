@@ -40,6 +40,8 @@ app.get('/api/compile', api.compile)
 
 app.get('/api/run', api.run)
 
+app.get('/api/verify', api.verify(connection))
+
 // USERS Routes
 app.post('/users/login', users.login(connection))
 
