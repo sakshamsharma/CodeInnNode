@@ -39,7 +39,12 @@ exports.signup = function(connection) {
         res.end();
       }
       else {
-        connection.query('INSERT into Users values (\'' + req.body.Username + '\', \'' + req.body.Email + '\', \'' + req.body.Password + '\')', function(err, rows, fields) {
+        connection.query("INSERT into Users (Name, Email, Password) values ('" + req.body.Username + "', '" + req.body.Email + "', '" + req.body.Password + "')", function(err, rows, fields) {
+          if(err) {
+            res.writeHead(403);
+            res.write(err.stack);
+            res.end();
+          }
           res.writeHead(200);
           res.write("Successfully created a new account");
           res.end();
