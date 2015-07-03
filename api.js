@@ -2,6 +2,7 @@ var fs = require('fs');
     sys = require('sys')
     exec = require('child_process').exec;
     spawn = require('child_process').spawn;
+    spawnSync = require('child_process').spawnSync;
 
 exports.query = function(connection) {
 
@@ -68,10 +69,8 @@ exports.run = function(req, res) {
         res.end();
       }
 
-      var child = spawn('./a.out');
-      child.stdin.setEncoding = 'utf-8';
-      child.stdout.pipe(res);
-      child.stdin.write(req.query.Input + "\n");
+      var child = spawnSync('./a.out', { input:  req.query.Input + "\n", timeout: 2000 });
+      res.send(child.stdout.toString());
 
       fs.unlink("./cpp/" + curtime + ".cpp", function(err) {
         if(err) throw err;
