@@ -1,6 +1,6 @@
-var express = require('express');
-var bodyParser = require('body-parser');
-var mysql = require('mysql');
+var express    = require('express'),
+    bodyParser = require('body-parser'),
+    mysql      = require('mysql')
 
 var app = express();
 app.use(bodyParser.json());
@@ -8,15 +8,16 @@ app.use(bodyParser.urlencoded({
   extended: true
 })); 
 
-var mysqlHost = process.env.OPENSHIFT_MYSQL_DB_HOST || 'localhost';
-var mysqlUser = process.env.OPENSHIFT_MYSQL_DB_USERNAME || 'root';
-var mysqlPass = process.env.OPENSHIFT_MYSQL_DB_PASSWORD || '0808';
+var mysqlHost = process.env.OPENSHIFT_MYSQL_DB_HOST || 'localhost',
+    mysqlUser = process.env.OPENSHIFT_MYSQL_DB_USERNAME || 'root',
+    mysqlPass = process.env.OPENSHIFT_MYSQL_DB_PASSWORD || '0808'
  
-var users = require('./users.js')
-var api   = require('./api.js')
+var users      = require('./users.js'),
+    api        = require('./api.js'),
+    contribute = require('./contribute.js')
 
-var sys = require('sys')
-var exec = require('child_process').exec;
+var sys  = require('sys'),
+    exec = require('child_process').exec
 
 var connection = mysql.createConnection({
   host     : mysqlHost,
@@ -50,6 +51,9 @@ app.post('/users/signup', users.signup(connection))
 app.post('/users/usernamequery', users.usernamequery(connection))
 
 app.post('/users/emailquery', users.emailquery(connection))
+
+// Contribute api call
+app.post('/contribute', contribute.contribute(connection))
 
 // SERVER Configuration
 var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8080
