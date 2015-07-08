@@ -26,7 +26,7 @@ exports.compile = function(req, res) {
     if (err) return console.log(err);
     console.log("File written");
 
-    exec("g++ cpp/" + curtime + ".cpp", function (error, stdout, stderr) {
+    exec("g++ cpp/" + curtime + ".cpp -o cpp/" + curtime + ".o", function (error, stdout, stderr) {
 
       if(error) {
         res.writeHead(403);
@@ -60,7 +60,7 @@ exports.run = function(req, res) {
     if (err) return console.log(err);
     console.log("File written");
 
-    exec("g++ cpp/" + curtime + ".cpp", function (error, stdout, stderr) {
+    exec("g++ cpp/" + curtime + ".cpp -o cpp/" + curtime + ".o", function (error, stdout, stderr) {
 
       if(error) {
         res.writeHead(403);
@@ -99,9 +99,9 @@ exports.verify = function(connection) {
 
     fs.writeFile("./cpp/" + curtime + ".cpp", new Buffer(req.query.Content, 'base64'), function(err) {
       if (err) return console.log(err);
-      console.log("File written");
+      console.log("File written " + curtime + ".o");
 
-      exec("g++ cpp/" + curtime + ".cpp", function (error, stdout, stderr) {
+      exec("g++ cpp/" + curtime + ".cpp -o cpp/" + curtime + ".o", function (error, stdout, stderr) {
 
         if(error) {
           res.writeHead(403);
@@ -112,7 +112,7 @@ exports.verify = function(connection) {
 
         var result = '';
 
-        var child = spawn('./a.out');
+        var child = spawn('./cpp/' + curtime + '.o');
         child.stdin.setEncoding = 'utf-8';
 
         child.stdout.on('data', function(buffer) {
@@ -138,6 +138,11 @@ exports.verify = function(connection) {
         fs.unlink("./cpp/" + curtime + ".cpp", function(err) {
           if(err) throw err;
           console.log("Deleted " + curtime + ".cpp");
+        })
+
+        fs.unlink("./cpp/" + curtime + ".o", function(err) {
+          if(err) throw err;
+          console.log("Deleted " + curtime + ".o");
         })
 
       });
