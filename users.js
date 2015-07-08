@@ -1,3 +1,5 @@
+var helpers = require('./helpers.js')
+
 exports.login = function(connection) {
 
   return function(req, res) {
@@ -96,6 +98,17 @@ exports.emailquery = function(connection) {
       }
     })
 
+  }
+
+}
+
+exports.getUserData = function(connection) {
+
+  return function(req, res) {
+
+    res.writeHead(403);
+    res.write( JSON.stringify( helpers.userData(connection) ) );
+    res.end();
   }
 
 }

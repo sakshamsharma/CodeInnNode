@@ -1,6 +1,9 @@
 var express    = require('express'),
     bodyParser = require('body-parser'),
-    mysql      = require('mysql')
+    mysql      = require('mysql'),
+    sys  = require('sys'),
+    exec = require('child_process').exec
+
 
 var app = express();
 app.use(bodyParser.json());
@@ -15,9 +18,6 @@ var mysqlHost = process.env.OPENSHIFT_MYSQL_DB_HOST || 'localhost',
 var users      = require('./users.js'),
     api        = require('./api.js'),
     contribute = require('./contribute.js')
-
-var sys  = require('sys'),
-    exec = require('child_process').exec
 
 var connection = mysql.createConnection({
   host     : mysqlHost,
@@ -51,6 +51,8 @@ app.post('/users/signup', users.signup(connection))
 app.post('/users/usernamequery', users.usernamequery(connection))
 
 app.post('/users/emailquery', users.emailquery(connection))
+
+app.get('/users/getuserdata', users.getUserData(connection))
 
 // Contribute api call
 app.post('/contribute', contribute.contribute(connection))
