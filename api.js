@@ -68,7 +68,7 @@ exports.run = function(req, res) {
         res.end();
       }
 
-      var child = spawn('./a.out');
+      var child = spawn('./cpp/' + curtime + '.o');
       child.stdin.setEncoding = 'utf-8';
       child.stdout.pipe(res);
       child.stdin.write(req.query.Input + "\n");
