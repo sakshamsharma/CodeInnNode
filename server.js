@@ -18,7 +18,7 @@ var mysqlHost = process.env.OPENSHIFT_MYSQL_DB_HOST || 'localhost',
 var users      = require('./users.js'),
     api        = require('./api.js'),
     contribute = require('./contribute.js'),
-    daily      = require('./daily.js')
+    query      = require('./query.js')
 
 var connection = mysql.createConnection({
   host     : mysqlHost,
@@ -36,9 +36,9 @@ app.get('/', function (req, res) {
 });
 
 // Query Routes
-app.get('/api/query', api.query(connection))
+app.get('/query/data', query.data(connection))
 
-app.get('/daily', daily.dailyChallenge(connection))
+app.get('/query/daily', query.daily(connection))
 
 // Compiling etc routes
 app.get('/api/compile', api.compile)

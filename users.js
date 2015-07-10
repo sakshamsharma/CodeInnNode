@@ -1,5 +1,3 @@
-var helpers = require('./helpers.js')
-
 exports.login = function(connection) {
 
   return function(req, res) {
@@ -106,9 +104,12 @@ exports.getUserData = function(connection) {
 
   return function(req, res) {
 
-    res.writeHead(403);
-    res.write( JSON.stringify( helpers.userData(connection) ) );
-    res.end();
+    connection.query('SELECT PPsolved, Contributions, Points from Users WHERE Name = "' + req.body.Username + '"', function(err, rows, fields) {
+      res.writeHead(403);
+      res.write( JSON.stringify(rows) );
+      res.end();
+    })
+
   }
 
 }

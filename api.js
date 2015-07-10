@@ -1,86 +1,82 @@
-var fs = require('fs');
-    sys = require('sys')
-    exec = require('child_process').exec;
-    spawn = require('child_process').spawn;
-
-exports.query = function(connection) {
-
-  return function(req, res) {
-
-    connection.query('SELECT * from ' + req.query.Table + ' WHERE UNIX_TIMESTAMP(CreationDate) > ' + Number(Date.parse(req.query.Timestamp))/1000, function(err, rows, fields){
-      if(err) throw err;
-      res.writeHead(200, { 'Content-Type': 'application/json'  });
-      res.write(JSON.stringify(rows));
-      res.end();
-    })
-
-  }
-
-}
+var execute = require('./execute.js');
 
 exports.compile = function(req, res) {
-
-  var curtime = new Date().getTime();
   
-  fs.writeFile("./cpp/" + curtime + ".cpp", new Buffer(req.query.Content, 'base64'), function(err) {
-    if (err) return console.log(err);
-    console.log("File written");
+  var curtime = new Date().getTime();
 
-    exec("g++ cpp/" + curtime + ".cpp -o cpp/" + curtime + ".o", function (error, stdout, stderr) {
-
-      if(error) {
-        res.writeHead(403);
-        res.write(stderr);
-        res.end();
-      }
-      else {
-        res.writeHead(200);
-        res.write("Compiled successfully");
-        res.end();
-      }
-
-      fs.unlink("./cpp/" + curtime + ".cpp", function(err) {
-        if(err) throw err;
-        console.log("Deleted " + curtime + ".cpp");
+  execute.saveCode(curtime, req.query.Content, function(sCode) {
+    if(sCode != 0) {
+      // If saving returned an error
+      res.writeHead(403);
+      res.write("There was an internal error.");
+      res.end();
+    }
+    else {
+      // Saved fine, go ahead with compile
+      execute.compileCode(curtime, function(cCode, cErr) {
+        if(cCode != 0) {
+          // If there was a compilation error
+          res.writeHead(403);
+          res.write("Compilation error:\n" + cErr);
+          res.end();
+        }
+        else {
+          // Compiled fine
+          res.writeHead(200);
+          res.write("Compiled successfully!");
+          res.end();
+        }
+        execute.deleteCode(curtime);
       })
-
-    });
-
-  }) 
+    }
+  });
 
 }
 
-
 exports.run = function(req, res) {
-
+  
   var curtime = new Date().getTime();
-  //I2luY2x1ZGUgPGlvc3RyZWFtPg0KDQp1c2luZyBuYW1lc3BhY2Ugc3RkOw0KDQppbnQgbWFpbigpIHsNCglzdHJpbmcgbmFtZTsNCgljaW4gPj4gbmFtZTsNCgljb3V0IDw8ICJIZWxsbyAiIDw8IG5hbWUgPDwgZW5kbDsNCglyZXR1cm4gMDsNCn0NCg==
 
-  fs.writeFile("./cpp/" + curtime + ".cpp", new Buffer(req.query.Content, 'base64'), function(err) {
-    if (err) return console.log(err);
-    console.log("File written");
-
-    exec("g++ cpp/" + curtime + ".cpp -o cpp/" + curtime + ".o", function (error, stdout, stderr) {
-
-      if(error) {
-        res.writeHead(403);
-        res.write(stderr);
-        res.end();
-      }
-
-      var child = spawn('./cpp/' + curtime + '.o');
-      child.stdin.setEncoding = 'utf-8';
-      child.stdout.pipe(res);
-      child.stdin.write(req.query.Input + "\n");
-
-      fs.unlink("./cpp/" + curtime + ".cpp", function(err) {
-        if(err) throw err;
-        console.log("Deleted " + curtime + ".cpp");
+  execute.saveCode(curtime, req.query.Content, function(sCode) {
+    if(sCode != 0) {
+      // If saving returned an error
+      res.writeHead(403);
+      res.write("There was an internal error.");
+      res.end();
+    }
+    else {
+      // Saved fine, go ahead with compile
+      execute.compileCode(curtime, function(cCode, cErr) {
+        if(cCode != 0) {
+          // If there was a compilation error
+          res.writeHead(403);
+          res.write("Compilation error:\n" + cErr);
+          res.end();
+        }
+        else {
+          // Compiled fine, go ahead with running
+          execute.runCode(curtime, req.query.Input, function(rCode, rOut, rErr) {
+            if(rCode != 0) {
+              // If there was a runtime error or TLE
+              res.writeHead(403);
+              if(rErr == "TLE")
+                res.write("Time limit exceeded. Perhaps you let an infinite loop run?");
+              else
+                res.write("Runtime error!");
+              res.end();
+            } 
+            else {
+              // No runtime error, send the stdout back
+              res.writeHead(200);
+              res.write(rOut);
+              res.end();
+            }
+            execute.deleteCode(curtime);
+          })
+        }
       })
-
-    });
-
-  }) 
+    }
+  });
 
 }
 
@@ -88,67 +84,73 @@ exports.verify = function(connection) {
 
   return function(req, res) {
 
-    var input, output;
-    var curtime = new Date().getTime();
-
     connection.query('SELECT * from ' + req.query.Table + 'Sol WHERE Id = ' + req.query.Id, function(err, rows, fields){
-      if(err) throw err;
-      input  = new Buffer(rows[0].Input, 'base64');
-      output = new Buffer(rows[0].Output, 'base64').toString();
-    })
+      if(err) {
+        console.log("DB error");
+        res.writeHead(403);
+        res.write("DB error");
+        res.end();
+        return;
+      }
 
-    fs.writeFile("./cpp/" + curtime + ".cpp", new Buffer(req.query.Content, 'base64'), function(err) {
-      if (err) return console.log(err);
-      console.log("File written " + curtime + ".o");
+      preInput  = new Buffer(rows[0].Input, 'base64');
+      ob = new Buffer(rows[0].Output, 'base64').toString();
+      preOutput = ob.trim().replace(/\s\s*$/gm, "");
 
-      exec("g++ cpp/" + curtime + ".cpp -o cpp/" + curtime + ".o", function (error, stdout, stderr) {
+      console.log("output: \n" + preOutput);
 
-        if(error) {
+      var curtime = new Date().getTime();
+
+      execute.saveCode(curtime, req.query.Content, function(sCode) {
+        if(sCode != 0) {
+          // If saving returned an error
           res.writeHead(403);
-          res.write(stderr);
+          res.write("There was an internal error.");
           res.end();
-          return;
         }
-
-        var result = '';
-
-        var child = spawn('./cpp/' + curtime + '.o');
-        child.stdin.setEncoding = 'utf-8';
-
-        child.stdout.on('data', function(buffer) {
-          result += buffer.toString();
-        })
-
-        child.stdout.on('end', function() {
-          // The weird regex is for removing trailing spaces.
-          if( result.trim() == output.trim().replace(/\s\s*$/gm, "") ) {
-            res.writeHead(200);
-            res.write("Correct submission!");
-            res.end();
-          }
-          else {
-            res.writeHead(403);
-            res.write("Incorrect submission. Please try again.");
-            res.end();
-          }
-        })
-
-        child.stdin.write(input + "\n");
-
-        fs.unlink("./cpp/" + curtime + ".cpp", function(err) {
-          if(err) throw err;
-          console.log("Deleted " + curtime + ".cpp");
-        })
-
-        fs.unlink("./cpp/" + curtime + ".o", function(err) {
-          if(err) throw err;
-          console.log("Deleted " + curtime + ".o");
-        })
-
+        else {
+          // Saved fine, go ahead with compile
+          execute.compileCode(curtime, function(cCode, cErr) {
+            if(cCode != 0) {
+              // If there was a compilation error
+              res.writeHead(403);
+              res.write("Compilation error:\n" + cErr);
+              res.end();
+            }
+            else {
+              // Compiled fine, go ahead with running
+              execute.runCode(curtime, preInput, function(rCode, rOut, rErr) {
+                if(rCode != 0) {
+                  // If there was a runtime error or TLE
+                  res.writeHead(403);
+                  if(rErr == "TLE")
+                    res.write("Time limit exceeded. Perhaps you let an infinite loop run?");
+                  else
+                    res.write("Runtime error!");
+                  res.end();
+                } 
+                else {
+                  // No runtime error, compare the stdout with predefined-output
+                  if( rOut.trim() == preOutput ) {
+                    res.writeHead(200);
+                    res.write("Correct submission!");
+                    res.end();
+                  }
+                  else {
+                    res.writeHead(403);
+                    res.write("Incorrect submission, please try again.");
+                    res.end();
+                  }
+                }
+                execute.deleteCode(curtime);
+              })
+            }
+          })
+        }
       });
 
-    }) 
+    })
 
   }
-
+  
 }
