@@ -40,16 +40,20 @@ exports.runCode = function(curtime, input, callback) {
 
   fs.writeFile("./cpp/" + curtime + ".i", input, function(err) {
 
-    var child = exec('./cpp/' + curtime + '.o < cpp/' + curtime + '.i', { timeout: 1000 }, function(error, stdout, stderr) {
+    var child = exec('./cpp/' + curtime + '.o < cpp/' + curtime + '.i', { timeout: 1000, killSignal: 'SIGKILL' }, function(error, stdout, stderr) {
       
       if (error !== null) {
         console.log('exec error: ' + error);
         console.log('exec error code: ' + error.code);
         console.log('exec error signal: ' + error.signal);
+        console.log('pid: ' + child.pid)
         if(error.code !== null)
           callback(error.code, stdout, stderr);
         else
           callback(-1, stdout, "TLE");
+        exec("pkill '" + curtime + ".o$'", function(err, stdout, stderr) {
+          console.log("pkill done");
+        })
       }
       else
         callback(0, stdout, stderr);
@@ -57,7 +61,7 @@ exports.runCode = function(curtime, input, callback) {
       fs.unlink("./cpp/" + curtime + ".i", function(err) {
         console.log("Deleted " + curtime + ".i");
       });
-
+      
     })
   })
 
