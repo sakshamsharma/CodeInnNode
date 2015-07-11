@@ -1,4 +1,5 @@
-var execute = require('./execute.js');
+var execute = require('./execute.js'),
+    helpers = require('./helpers.js')
 
 exports.compile = function(req, res) {
   
@@ -132,9 +133,19 @@ exports.verify = function(connection) {
                 else {
                   // No runtime error, compare the stdout with predefined-output
                   if( rOut.trim() == preOutput ) {
-                    res.writeHead(200);
-                    res.write("Correct submission!");
-                    res.end();
+                    var response = "Correct submission! ";
+
+                    // Update the DB to store that the problem has been successfully solved
+                    helpers.addToList(connection, 'PPsolved', req.query.username, req.query.Id, function(code) {
+                      if(code != 0 && code != -1)
+                        response = response + "But the database was not updated. Please submit again.";
+                      else if(code == -1)
+                        response = response + "The particular problem has already been submitted";
+
+                      res.writeHead(200);
+                      res.write(response);
+                      res.end();
+                    })
                   }
                   else {
                     res.writeHead(403);

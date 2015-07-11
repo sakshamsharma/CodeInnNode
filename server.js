@@ -18,7 +18,8 @@ var mysqlHost = process.env.OPENSHIFT_MYSQL_DB_HOST || 'localhost',
 var users      = require('./users.js'),
     api        = require('./api.js'),
     contribute = require('./contribute.js'),
-    query      = require('./query.js')
+    query      = require('./query.js'),
+    helpers    = require('./helpers.js')
 
 var connection = mysql.createConnection({
   host     : mysqlHost,
@@ -52,9 +53,9 @@ app.post('/users/login', users.login(connection))
 
 app.post('/users/signup', users.signup(connection))
 
-app.post('/users/usernamequery', users.usernamequery(connection))
+app.post('/users/usernamequery', helpers.usernamequery(connection))
 
-app.post('/users/emailquery', users.emailquery(connection))
+app.post('/users/emailquery', helpers.emailquery(connection))
 
 app.get('/users/getuserdata', users.getUserData(connection))
 

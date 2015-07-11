@@ -56,50 +56,6 @@ exports.signup = function(connection) {
 
 }
 
-exports.usernamequery = function(connection) {
-  
-  return function(req, res) {
-
-    connection.query('SELECT Name from Users WHERE Name = "' + req.body.Username + '"', function(err, rows, fields) {
-      if(err) throw err;
-      if(rows.length != 0) {
-        res.writeHead(403);
-        res.write("Username already exists");
-        res.end();
-      }
-      else {
-        res.writeHead(200);
-        res.writeHead("Username allowed");
-        res.end();
-      }
-    })
-
-  }
-
-}
-
-exports.emailquery = function(connection) {
-  
-  return function(req, res) {
-
-    connection.query('SELECT Email from Users WHERE Email = "' + req.body.Email + '"', function(err, rows, fields) {
-      if(err) throw err;
-      if(rows.length != 0) {
-        res.writeHead(403);
-        res.write("Email already in use");
-        res.end();
-      }
-      else {
-        res.writeHead(200);
-        res.writeHead("Email allowed");
-        res.end();
-      }
-    })
-
-  }
-
-}
-
 exports.getUserData = function(connection) {
 
   return function(req, res) {
