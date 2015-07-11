@@ -1,4 +1,5 @@
 var spawn = require('child_process').spawn,
+    exec  = require('child_process').exec,
     fs    = require('fs')
 
 exports.saveCode = function(curtime, content, callback) {
@@ -37,42 +38,22 @@ exports.compileCode = function(curtime, callback) {
 
 exports.runCode = function(curtime, input, callback) {
 
-  var out = '';
-  var err = '';
-  var running = 1;
+  fs.writeFile("./cpp/" + curtime + ".i", input, function(err) {
 
-  var execute = spawn('./cpp/' + curtime + '.o');
+    var child = exec('./cpp/' + curtime + '.o < cpp/' + curtime + '.i', function(error, stdout, stderr) {
+      
+      if (error !== null) {
+        console.log('exec error: ' + error);
+        callback(1, stdout, stderr);
+      }
+      else
+        callback(0, stdout, stderr);
 
-  execute.stderr.on('data', function(buffer) {
-    err += buffer.toString();
+      fs.unlink("./cpp/" + curtime + ".i", function(err) {
+        console.log("Deleted " + curtime + ".i");
+      });
+
+    })
   })
 
-  execute.stdout.on('data', function(buffer) {
-    out += buffer.toString();
-  })
-
-  execute.stdin.write(input + "\n");
-
-  execute.on('close', function(code) {
-    if(running) {
-      running = 0;
-      return callback(code, out, err);
-    }
-  })
-
-  execute.stdout.on('end', function() {
-    if(running) {
-      running = 0;
-      return callback(0, out, err);
-    }
-  })
-
-  setTimeout(function() {
-    if(running) {
-      console.log("Timeout for " + curtime);
-      running = 0;
-      return callback(-1, '', 'TLE');
-    }
-    execute.kill();
-  }, 1000);
 }
