@@ -2,7 +2,7 @@ exports.contribute = function(connection) {
 
   return function(req, res) {
 
-    connection.query("INSERT into Contributions values('" + req.body.Username + "', '" + req.body.Category + "', '" + req.body.Title + "', '" + req. body.Content + "', '" + req.body.AdditionalContent + ", 0')", function(err, rows, fields) {
+    connection.query("INSERT into Contributions (Username, Category, Title, Content, AdditionalContent) values('" + req.body.Username + "', '" + req.body.Category + "', '" + req.body.Title + "', '" + req. body.Content + "', '" + req.body.AdditionalContent + "')", function(err, rows, fields) {
       if(err) {
         console.log(err);
         res.writeHead(403);
