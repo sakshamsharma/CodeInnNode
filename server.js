@@ -15,11 +15,11 @@ var mysqlHost = process.env.OPENSHIFT_MYSQL_DB_HOST || 'localhost',
     mysqlUser = process.env.OPENSHIFT_MYSQL_DB_USERNAME || 'root',
     mysqlPass = process.env.OPENSHIFT_MYSQL_DB_PASSWORD || '0808'
  
-var users      = require('./users.js'),
-    api        = require('./api.js'),
-    contribute = require('./contribute.js'),
-    query      = require('./query.js'),
-    helpers    = require('./helpers.js')
+var users   = require('./users.js'),
+    api     = require('./api.js'),
+    misc    = require('./misc.js'),
+    query   = require('./query.js'),
+    helpers = require('./helpers.js')
 
 var connection = mysql.createConnection({
   host     : mysqlHost,
@@ -60,7 +60,9 @@ app.post('/users/emailquery', helpers.emailquery(connection))
 app.get('/users/getuserdata', users.getUserData(connection))
 
 // Contribute api call
-app.post('/contribute', contribute.contribute(connection))
+app.post('/contribute', misc.contribute(connection))
+
+app.get('/leaderboard', misc.leaderboard(connection))
 
 // SERVER Configuration
 var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8080
