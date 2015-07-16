@@ -21,7 +21,7 @@ exports.leaderboard = function(connection) {
 
   return function(req, res) {
 
-    connection.query("SELECT Name, Points from Users", function(err, rows, fields) {
+    connection.query("SELECT Name, Points from Users ORDER BY Points DESC LIMIT 10", function(err, rows, fields) {
       if(err) {
         res.writeHead(403);
         res.write("There was an internal server error.");
