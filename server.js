@@ -41,6 +41,8 @@ app.get('/query/data', query.data(connection))
 
 app.get('/query/daily', query.daily(connection))
 
+app.get('/query/solution', query.solution(connection))
+
 // Compiling etc routes
 app.get('/api/compile', api.compile)
 

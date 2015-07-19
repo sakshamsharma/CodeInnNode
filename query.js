@@ -8,12 +8,10 @@ exports.daily = function(connection) {
       res.write(JSON.stringify(rows));
       res.end();
     })
-
   }
-
 }
 
-exports.data= function(connection) {
+exports.data = function(connection) {
 
   return function(req, res) {
 
@@ -23,7 +21,18 @@ exports.data= function(connection) {
       res.write(JSON.stringify(rows));
       res.end();
     })
-
   }
+}
 
+exports.solution = function(connection) {
+
+  return function(req, res) {
+
+    connection.query('SELECT Solutions from ProblemsSol WHERE Id = "' + req.query.Id + '"', function(err, rows, fields) {
+      if(err) throw err;
+      res.writeHead(200, { 'Content-Type': 'application/json'  });
+      res.write(JSON.stringify(rows));
+      res.end();
+    })
+  }
 }
