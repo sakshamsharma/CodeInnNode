@@ -1,3 +1,5 @@
+var helpers = require('./helpers.js')
+
 exports.daily = function(connection) {
 
   return function(req, res) {
@@ -30,9 +32,34 @@ exports.solution = function(connection) {
 
     connection.query('SELECT Solutions from ProblemsSol WHERE Id = "' + req.query.Id + '"', function(err, rows, fields) {
       if(err) throw err;
-      res.writeHead(200, { 'Content-Type': 'application/json'  });
-      res.write(JSON.stringify(rows));
-      res.end();
+      helpers.checkInList(connection, 'PPsolved', req.query.username, req.query.Id, function(code) {
+        if(code != 0 && code != 1) {
+          res.writeHead(403);
+          res.write("There was an internal server error. Try again later.");
+          res.end();
+        }
+        else {
+          if(code == 1) {
+            res.writeHead(200, { 'Content-Type': 'application/json'  });
+            res.write(JSON.stringify(rows));
+            res.end();
+          }
+          else if(code == 0) {
+            helpers.increasePoints(connection, -8, req.query.username, function(code2) {
+              if(code2 == 1) {
+                res.writeHead(403);
+                res.write("There was an internal server error. Try again later.");
+                res.end();
+              }
+              else {
+                res.writeHead(200, { 'Content-Type': 'application/json'  });
+                res.write(JSON.stringify(rows));
+                res.end();
+              }
+            })
+          }
+        }
+      })
     })
   }
 }

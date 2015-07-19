@@ -96,3 +96,27 @@ exports.addToList = function(connection, column, username, id, callback) {
   })
 
 }
+
+exports.checkInList = function(connection, column, username, id, callback) {
+  
+  connection.query('SELECT ' + column + ' AS to_search from Users WHERE Name = "' + username + '"', function(err, rows, fields) {
+    if(err) {
+      console.log("Error searching if question id has been solved")
+      console.log(err)
+      callback(2);
+    }
+    else {
+      var list = rows[0].to_search.split(',');
+      var does_exist = 0;
+      for(var i=1; i<list.length; i++) {
+        if(list[i] == id) {
+          does_exist = 1;
+          break;
+        }
+      }
+      if(does_exist)
+        callback(1);
+      else callback(0);
+    }
+  })
+}
