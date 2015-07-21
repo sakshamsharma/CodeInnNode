@@ -61,7 +61,7 @@ exports.getUserData = function(connection) {
   return function(req, res) {
 
     connection.query('SELECT PPsolved, Points from Users WHERE Name = "' + req.query.Username + '"', function(err, rows, fields) {
-      res.writeHead(403);
+      res.writeHead(200);
       res.write( JSON.stringify(rows) );
       res.end();
     })
